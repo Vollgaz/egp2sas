@@ -1,5 +1,5 @@
 name := "egp2sas"
-organization := "lu.foyer.infocentre"
+organization := "org.vollgaz.sas"
 scalaVersion := "2.12.8"
 
 libraryDependencies ++= Seq(

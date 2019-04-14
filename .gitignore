@@ -1,9 +1,9 @@
-/.idea
-/target
+.idea/
+target/
 /*.bat
 *.class
 .DS_Store
 .bloop/
 *.log
-src/test/resources
+src/test/resources/
 

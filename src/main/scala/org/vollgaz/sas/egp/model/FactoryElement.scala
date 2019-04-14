@@ -1,49 +1,50 @@
 package org.vollgaz.sas.egp.model
 
 import scala.collection.immutable
-import scala.xml.{Node, NodeSeq}
+import scala.xml.{Elem, Node}
 
 object FactoryElement {
 
-    def buildElementsCollection(nodeseq: NodeSeq): Seq[Element] = {
-        nodeseq.map(buildElement)
+    def buildElementsCollection(xmlModel: Elem): Seq[Element] = {
+        val xmlElements = xmlModel \\ "Elements" \ "Element"
+        xmlElements.map(doElement)
     }
 
     def buildElement(node: Node): Element = {
-        getNodeType(node) match {
-            case x if x.equals(EnumNodeElement.PFD.toString)  => getElementWorkflow(node)
-            case x if x.equals(EnumNodeElement.CODE.toString) => getElementCode(node)
-            case _                                            => getElement(node)
+        extractType(node) match {
+            case x if x.equals(EnumNodeElement.PFD.toString)  => doElementWorkflow(node)
+            case x if x.equals(EnumNodeElement.CODE.toString) => doElementCode(node)
+            case _                                            => doElement(node)
         }
     }
 
-    private def getElementCode(node: Node): ElementCode = {
-        new ElementCode(getNodeId(node),
-            getNodeAncestor(node),
-            getNodeType(node),
-            getCodeSubmitted(node))
+    def doElement(node: Node): Element = {
+        new Element(extractId(node),
+            extractAncestor(node),
+            extractType(node))
     }
 
-    private def getCodeSubmitted(node: Node): String = (node \ "Code" \ "TaskCode").text
-
-    private def getElement(node: Node): Element = {
-        new Element(getNodeId(node),
-            getNodeAncestor(node),
-            getNodeType(node))
+    def doElementWorkflow(node: Node): ElementWorkflow = {
+        new ElementWorkflow(extractId(node),
+            extractAncestor(node),
+            extractType(node),
+            extractProcessFlow(node))
     }
 
-    private def getElementWorkflow(node: Node): ElementWorkflow = {
-        new ElementWorkflow(getNodeId(node),
-            getNodeAncestor(node),
-            getNodeType(node),
-            getProcessFlow(node))
+    def doElementCode(node: Node): ElementCode = {
+        new ElementCode(extractId(node),
+            extractAncestor(node),
+            extractType(node),
+            extractCodeSubmitted(node))
     }
 
-    private def getNodeType(node: Node): String = (node \@ "Type").toString
+    private def extractProcessFlow(node: Node): immutable.Seq[String] = (node \ "PFD" \ "Process").map(x => (x \ "Element" \ "ID").text)
 
-    private def getNodeId(node: Node): String = (node \ "Element" \ "ID").text
+    private def extractId(node: Node): String = (node \ "Element" \ "ID").text
 
-    private def getNodeAncestor(node: Node): String = (node \ "Element" \ "InputIDs").text
+    private def extractAncestor(node: Node): String = (node \ "Element" \ "InputIDs").text
 
-    private def getProcessFlow(node: Node): immutable.Seq[String] = (node \ "PFD" \ "Process").map(x => (x \ "Element" \ "ID").text)
+    private def extractType(node: Node): String = (node \@ "Type").toString
+
+    private def extractCodeSubmitted(node: Node): String = (node \ "Code" \ "TaskCode").text
 }
