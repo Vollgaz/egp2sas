@@ -2,20 +2,34 @@ package org.vollgaz.sas.egp
 
 import java.io.File
 
-class EgpScanner(folderpath: String) {
+/**
+  *
+  * @param file Is an arbitrary filepath. Can be a directory or a proper file.
+  */
+class EgpScanner(file: File) {
 
     def findEGPfiles(): Array[File] = {
-        val file = new File(folderpath)
-        if (file.isDirectory) {
-            recursiveListFiles(file)
-                .filter(_.isFile)
-                .filter(_.getName.split("\\.").last.toLowerCase == "egp")
+        if (this.file.isDirectory) {
+            getAllEgpFiles(this.file)
         }
-        else throw new Exception("Not a directory")
+        else if (this.file.isFile && "egp".equals(getFileExtension(this.file))) {
+            Array[File](this.file)
+        }
+        else throw new Exception("Neither a folder nor an EGP file.")
     }
 
-    def recursiveListFiles(f: File): Array[File] = {
-        val files = f.listFiles
+    private def getAllEgpFiles(folder: File): Array[File] = {
+        recursiveListFiles(folder)
+            .filter(_.isFile)
+            .filter(_.getName.split("\\.").last.toLowerCase == "egp")
+    }
+
+    private def recursiveListFiles(folder: File): Array[File] = {
+        val files = folder.listFiles
         files ++ files.filter(_.isDirectory).flatMap(recursiveListFiles)
+    }
+
+    private def getFileExtension(file: File): String = {
+        file.getName.split("\\.").last.toLowerCase
     }
 }

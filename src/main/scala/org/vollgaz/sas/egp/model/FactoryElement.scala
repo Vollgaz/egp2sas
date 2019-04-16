@@ -7,14 +7,15 @@ object FactoryElement {
 
     def buildElementsCollection(xmlModel: Elem): Seq[Element] = {
         val xmlElements = xmlModel \\ "Elements" \ "Element"
-        xmlElements.map(doElement)
+        xmlElements.map(buildElement)
     }
 
     def buildElement(node: Node): Element = {
-        extractType(node) match {
-            case x if x.equals(EnumNodeElement.PFD.toString)  => doElementWorkflow(node)
+        val nodetype = extractType(node)
+        nodetype match {
+            case x if x.equals(EnumNodeElement.PFD.toString) => doElementWorkflow(node)
             case x if x.equals(EnumNodeElement.CODE.toString) => doElementCode(node)
-            case _                                            => doElement(node)
+            case _ => doElement(node)
         }
     }
 

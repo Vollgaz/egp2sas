@@ -1,9 +1,12 @@
+#Directory
 .idea/
-target/
-/*.bat
-*.class
 .DS_Store
 .bloop/
-*.log
+target/
 src/test/resources/
+
+#File
+*.log
+*.class
+
 

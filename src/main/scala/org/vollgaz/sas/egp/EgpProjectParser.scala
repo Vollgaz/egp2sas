@@ -1,22 +1,18 @@
 package org.vollgaz.sas.egp
 
+import java.io.InputStream
+
 import org.vollgaz.sas.egp.model._
 
 import scala.xml.{Elem, XML}
 
 
-class EgpProjectParser {
-    def parseFile(filepath: String): String = {
-        val xmlModel: Elem = XML.loadFile(filepath)
-        generateSASProgramm(xmlModel)
+class EgpProjectParser() {
+    def parseStream(stream: InputStream): String = {
+        generateSASProgram(XML.load(stream))
     }
 
-    def parseString(filecontent: String): String = {
-        val xmlModel: Elem = XML.loadString(filecontent)
-        generateSASProgramm(xmlModel)
-    }
-
-    private def generateSASProgramm(xmlModel: Elem): String = {
+    private def generateSASProgram(xmlModel: Elem): String = {
         val elements = FactoryElement.buildElementsCollection(xmlModel)
         val taskToCode: Map[String, String] = linkTaskToCode(elements)
         val flowToTask: Seq[String] = linkWorkflowToTask(elements)
@@ -33,7 +29,10 @@ class EgpProjectParser {
         elements
             .filter(_.nodetype == EnumNodeElement.CODE.toString)
             .filter(_.ancestor != "")
-            .map(x => x.ancestor -> x.asInstanceOf[ElementCode].code).toMap
+            .map(x => {
+                println(s"id : ${x.id}    type : ${x.nodetype}   class : ${x.getClass}")
+                x.ancestor -> x.asInstanceOf[ElementCode].code
+            }).toMap
     }
 
     private def linkWorkflowToTask(elements: Seq[Element]): Seq[String] = {
