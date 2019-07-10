@@ -1,2 +1,10 @@
-*.class
+#Directory
+.idea/
+.DS_Store
+.bloop/
+target/
+src/test/resources/
+
+#File
 *.log
+*.class
