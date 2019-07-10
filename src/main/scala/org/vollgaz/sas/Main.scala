@@ -4,38 +4,40 @@ import java.io.{File, FileWriter}
 
 import org.vollgaz.sas.egp._
 
-
 object Main {
+    var config: MainConfig = _
+
     def main(args: Array[String]): Unit = {
-        val config: Egp2sasConfig = new Egp2sasArgsParser(args).getConfig.get
-        runProgram(config.src, config.dest)
+        this.config = new MainArgsParser(args).getConfig.get
+        runProgram()
     }
 
-    def runProgram(src: File, dest: File): Unit = {
-        val fileList: Array[File] = new EgpScanner(src).findEGPfiles()
+    def runProgram(): Unit = {
+        val fileList: Array[File] = new EgpScanner(config.src).findEGPfiles()
         println("File found : ")
         fileList.foreach(x => println(x.getAbsolutePath))
-        if (isOkToProcess) {
-            processFile(fileList, dest)
+        if (config.noprompt || isOkToProcess) {
+            processFile(fileList, config.dest)
         }
+
     }
 
     def isOkToProcess: Boolean = {
         print("Process these files ? [y/n] : ")
-        val char = scala.io.StdIn.readChar()
+        val char = Some(scala.io.StdIn.readLine())
         char match {
-            case 'y' => true
-            case 'n' => false
-            case _ => isOkToProcess
+            case Some("y") => true
+            case Some("n") => false
+            case _         => isOkToProcess
         }
     }
 
-    def processFile(fileList: Array[File], dest : File): Unit = {
+    def processFile(fileList: Array[File], dest: File): Unit = {
         fileList.foreach((file: File) => {
-            println(s"${file.getAbsolutePath}  exist: ${file.exists()}")
-            val filewriter: FileWriter = new FileWriter(s"${dest.getAbsolutePath}/${file.getName}.sas")
+            println(s"${file.getAbsolutePath}  converti : ${file.exists()}")
+            val filewriter: FileWriter = new FileWriter(s"${dest.getAbsolutePath}/${file.getName.replace(".egp", "")}.sas")
             val filestream = new EgpReader(file).getProjectStream
-            val sasprogram: String = new EgpProjectParser().parseStream(filestream)
+            val sasprogram: String = new EgpProjectParser(file.getParent).parseStream(filestream)
             filewriter.write(sasprogram)
             filewriter.close()
         })

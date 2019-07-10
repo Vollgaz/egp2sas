@@ -13,9 +13,9 @@ object FactoryElement {
     def buildElement(node: Node): Element = {
         val nodetype = extractType(node)
         nodetype match {
-            case x if x.equals(EnumNodeElement.PFD.toString) => doElementWorkflow(node)
+            case x if x.equals(EnumNodeElement.PFD.toString)  => doElementWorkflow(node)
             case x if x.equals(EnumNodeElement.CODE.toString) => doElementCode(node)
-            case _ => doElement(node)
+            case _                                            => doElement(node)
         }
     }
 
